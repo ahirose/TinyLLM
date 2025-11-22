@@ -241,6 +241,114 @@ TinyLLM/
 
 ---
 
+### 📖 コードの読み方・お勧めの順番
+
+Transformerと言語モデルを理解するために、以下の順番でコードを読むことをお勧めします。
+
+#### ステップ1: `tiny_transformer.py` - モデルアーキテクチャ（最重要）
+
+**読む順番:**
+
+```
+1. TinyLLM クラス (メインモデル)
+   └── forward() メソッドで全体の流れを把握
+
+2. TokenEmbedding クラス
+   └── トークンIDを密なベクトルに変換する仕組み
+
+3. PositionalEncoding クラス
+   └── sin/cos関数による位置情報の埋め込み方法
+
+4. MultiHeadSelfAttention クラス（★最重要）
+   └── Q, K, V の計算
+   └── Attention Score の計算
+   └── Causal Mask の適用
+   └── Multi-Head の結合
+
+5. FeedForward クラス
+   └── 2層の全結合ネットワーク
+   └── GELU活性化関数
+
+6. TransformerBlock クラス
+   └── Attention → Add & Norm → FFN → Add & Norm の流れ
+```
+
+**ポイント:**
+- 各クラスの `__init__` で構造を理解し、`forward` で処理の流れを追う
+- コメントは日英両方あるので、理解しやすい方を読む
+- `MultiHeadSelfAttention` が最も重要。時間をかけて理解する
+
+#### ステップ2: `train.py` - 学習プロセス
+
+**読む順番:**
+
+```
+1. SimpleTokenizer クラス
+   └── 文字レベルトークナイザーの実装
+   └── encode/decode の仕組み
+
+2. TextDataset クラス
+   └── 入力とターゲットのペア作成方法
+   └── スライディングウィンドウ方式
+
+3. train_epoch() 関数
+   └── 1エポックの学習ループ
+   └── forward → loss → backward → step の流れ
+
+4. evaluate() 関数
+   └── 検証データでの評価方法
+
+5. train() 関数（メイン）
+   └── 全体の学習フロー
+   └── 学習率スケジューラー
+   └── モデル保存のタイミング
+```
+
+**ポイント:**
+- `train_epoch` の中のループが学習の本質
+- 損失関数（CrossEntropyLoss）がどう使われるか確認
+- 勾配計算とパラメータ更新の流れを追う
+
+#### ステップ3: `inference.py` - テキスト生成
+
+**読む順番:**
+
+```
+1. load_model() 関数
+   └── 保存したモデルの読み込み方法
+
+2. TinyLLM.generate() メソッド（tiny_transformer.py内）
+   └── 自己回帰生成のループ
+   └── Temperature による確率調整
+   └── Top-K フィルタリング
+   └── Top-P (Nucleus) サンプリング
+
+3. generate_text() 関数
+   └── 推論の全体フロー
+   └── トークン化 → 生成 → デコード
+
+4. demonstrate_sampling_methods() 関数
+   └── 各サンプリング手法の比較
+```
+
+**ポイント:**
+- `generate()` メソッドが自己回帰の核心
+- サンプリング手法の違いを実際に試して理解する
+
+#### 理解度チェックリスト
+
+- [ ] Token Embedding が何をしているか説明できる
+- [ ] Positional Encoding がなぜ必要か説明できる
+- [ ] Q, K, V の役割を説明できる
+- [ ] Attention Score の計算方法を説明できる
+- [ ] Causal Mask がなぜ必要か説明できる
+- [ ] Multi-Head Attention の利点を説明できる
+- [ ] 学習時の損失関数の意味を説明できる
+- [ ] 自己回帰生成の仕組みを説明できる
+- [ ] Temperature の効果を説明できる
+
+---
+
 ### 🔧 モデル設定
 
 | パラメータ | 説明 | デフォルト値 |
@@ -500,6 +608,114 @@ TinyLLM/
 ├── inference.py         # Inference script
 └── README.md            # This file
 ```
+
+---
+
+### 📖 How to Read the Code - Recommended Order
+
+To understand Transformers and language models, we recommend reading the code in the following order.
+
+#### Step 1: `tiny_transformer.py` - Model Architecture (Most Important)
+
+**Reading order:**
+
+```
+1. TinyLLM class (main model)
+   └── Understand the overall flow in forward() method
+
+2. TokenEmbedding class
+   └── How token IDs are converted to dense vectors
+
+3. PositionalEncoding class
+   └── Position information embedding using sin/cos functions
+
+4. MultiHeadSelfAttention class (★ Most Important)
+   └── Q, K, V computation
+   └── Attention Score calculation
+   └── Causal Mask application
+   └── Multi-Head concatenation
+
+5. FeedForward class
+   └── 2-layer fully connected network
+   └── GELU activation function
+
+6. TransformerBlock class
+   └── Flow: Attention → Add & Norm → FFN → Add & Norm
+```
+
+**Key points:**
+- Understand the structure in each class's `__init__`, then follow the processing flow in `forward`
+- Comments are in both Japanese and English - read whichever is easier for you
+- `MultiHeadSelfAttention` is the most important. Take your time to understand it
+
+#### Step 2: `train.py` - Training Process
+
+**Reading order:**
+
+```
+1. SimpleTokenizer class
+   └── Character-level tokenizer implementation
+   └── encode/decode mechanism
+
+2. TextDataset class
+   └── How input-target pairs are created
+   └── Sliding window approach
+
+3. train_epoch() function
+   └── Training loop for one epoch
+   └── Flow: forward → loss → backward → step
+
+4. evaluate() function
+   └── How evaluation on validation data works
+
+5. train() function (main)
+   └── Overall training flow
+   └── Learning rate scheduler
+   └── When to save the model
+```
+
+**Key points:**
+- The loop inside `train_epoch` is the essence of training
+- Check how the loss function (CrossEntropyLoss) is used
+- Follow the flow of gradient computation and parameter updates
+
+#### Step 3: `inference.py` - Text Generation
+
+**Reading order:**
+
+```
+1. load_model() function
+   └── How to load a saved model
+
+2. TinyLLM.generate() method (in tiny_transformer.py)
+   └── Autoregressive generation loop
+   └── Probability adjustment with Temperature
+   └── Top-K filtering
+   └── Top-P (Nucleus) sampling
+
+3. generate_text() function
+   └── Overall inference flow
+   └── Tokenization → Generation → Decoding
+
+4. demonstrate_sampling_methods() function
+   └── Comparison of different sampling methods
+```
+
+**Key points:**
+- The `generate()` method is the core of autoregressive generation
+- Try different sampling methods to understand their differences
+
+#### Understanding Checklist
+
+- [ ] Can explain what Token Embedding does
+- [ ] Can explain why Positional Encoding is necessary
+- [ ] Can explain the roles of Q, K, V
+- [ ] Can explain how Attention Score is calculated
+- [ ] Can explain why Causal Mask is needed
+- [ ] Can explain the benefits of Multi-Head Attention
+- [ ] Can explain the meaning of the loss function during training
+- [ ] Can explain how autoregressive generation works
+- [ ] Can explain the effect of Temperature
 
 ---
 
