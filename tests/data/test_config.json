@@ -1,0 +1,23 @@
+{
+    "model_config": {
+        "d_model": 64,
+        "n_heads": 2,
+        "n_layers": 2,
+        "d_ff": 256,
+        "max_seq_len": 64,
+        "dropout": 0.1
+    },
+    "training_config": {
+        "batch_size": 4,
+        "seq_len": 16,
+        "epochs": 2,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01
+    },
+    "test_prompts": [
+        "The quick",
+        "Machine learning",
+        "Neural networks",
+        "Hello world"
+    ]
+}
